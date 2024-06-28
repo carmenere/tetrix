@@ -1,0 +1,24 @@
+[package]
+authors = ["Anton Romanov <a.romanovich86@gmail.com>"]
+description = "Tetrix simplifies the customization of any environment: local development environment, CI/CD environment and so on."
+edition = "2021"
+exclude = [".gitignore"]
+keywords = ["variables", "orchestrator", "template", "processor", "environment"]
+license = "Apache-2.0"
+name = "tetrix"
+readme = "README.md"
+repository = "https://github.com/carmenere/tetrix"
+rust-version = "1.79.0"
+version = "0.0.1"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+
+[profile.release]
+strip = "symbols"
+
+[profile.dev]
+opt-level = 3
+debug = 1
