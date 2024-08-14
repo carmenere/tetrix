@@ -32,7 +32,7 @@
         "Cargo.toml"
     ],
     "rust-analyzer.cargo.extraEnv": {
-        "CARGO_TARGET_DIR": "target-vscode",
+        "CARGO_TARGET_DIR": "target",
         "BUILD_VERSION": "vscode",
         "DATABASE_URL": "postgres://tetrix_user:12345@localhost:5432/tetrix_db"
     },
