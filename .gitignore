@@ -18,3 +18,10 @@ Cargo.lock
 # Added by cargo
 
 /target
+
+# make artefacts
+/.artefacts
+.artefacts/
+
+# clippy
+clippy-report.json
