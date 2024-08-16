@@ -33,6 +33,9 @@ schemas:
 build: schemas
 	make -f $(MK)/cargo.mk build
 
+restart: stop build
+	make -f $(MK)/app.mk run
+
 start: build
 	make -f $(MK)/app.mk run
 

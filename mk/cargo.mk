@@ -53,14 +53,14 @@ CARGO_TEST_OPTS ?= $(OPT_PROFILE) $(OPT_FEATURES) \
     --target $(TARGET_ARCH)
 
 CARGO ?= cargo +$(RUST_VERSION)
-CMD_BUILD ?= $(ENVS) $(CARGO) build $(CARGO_OPTS)
-CMD_CLIPPY ?= $(ENVS) $(CARGO) clippy $(CARGO_OPTS) --message-format $(CLIPPY_FORMAT) -- $(LINTS) 1>$(CLIPPY_REPORT)
-CMD_CLIPPY_FIX ?= $(ENVS) $(CARGO) clippy --fix --allow-staged $(CARGO_OPTS)
-CMD_TEST ?= $(ENVS) $(CARGO) test $(CARGO_TEST_OPTS)
-CMD_CLEAN ?= $(ENVS) $(CARGO) clean --manifest-path $(CARGO_TOML) --target-dir $(TARGET_DIR)
-CMD_FMT ?= $(ENVS) cargo +nightly fmt
+CMD_BUILD ?= $(BUILD_ENVS) $(CARGO) build $(CARGO_OPTS)
+CMD_CLIPPY ?= $(BUILD_ENVS) $(CARGO) clippy $(CARGO_OPTS) --message-format $(CLIPPY_FORMAT) -- $(LINTS) 1>$(CLIPPY_REPORT)
+CMD_CLIPPY_FIX ?= $(BUILD_ENVS) $(CARGO) clippy --fix --allow-staged $(CARGO_OPTS)
+CMD_TEST ?= $(BUILD_ENVS) $(CARGO) test $(CARGO_TEST_OPTS)
+CMD_CLEAN ?= $(BUILD_ENVS) $(CARGO) clean --manifest-path $(CARGO_TOML) --target-dir $(TARGET_DIR)
+CMD_FMT ?= $(BUILD_ENVS) cargo +nightly fmt
 CMD_FMT_CHECK ?= $(CMD_FMT) -- --check && echo -e "    \033[1;32mFinished\033[0m fmt check."
-CMD_DOC ?= $(ENVS) $(CARGO) doc --no-deps --document-private-items
+CMD_DOC ?= $(BUILD_ENVS) $(CARGO) doc --no-deps --document-private-items
 
 .PHONY: all build clippy clippy-fix lint test fmt fmt-check doc install uninstall clean distclean
 

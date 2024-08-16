@@ -11,11 +11,11 @@ RUST_LOG = axum=$(SEVERITY),sqlx=$(SEVERITY)
 # ENVS
 ENVS ?= \
     RUST_LOG='$(RUST_LOG)' \
-    PG_HOST='$(HOST)' \
-    PG_PORT='$(PORT)' \
-    PG_DB='$(USER_DB)' \
-    PG_USER='$(USER_NAME)' \
-    PG_PASSWORD='$(USER_PASSWORD)'
+    PG_HOST='$(PG_HOST)' \
+    PG_PORT='$(PG_PORT)' \
+    PG_DB='$(PG_USER_DB)' \
+    PG_USER='$(PG_USER_NAME)' \
+    PG_PASSWORD='$(PG_USER_PASSWORD)'
 
 define escape
 $(subst ",\",$(subst ',\',$1))
