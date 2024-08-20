@@ -6,7 +6,7 @@ LOG_FILE ?= $(ARTEFACTS)/.logs/$(SQLX)
 PID_FILE ?= $(ARTEFACTS)/.pid/$(SQLX)
 PKILL_PATTERN ?= $(BIN_PATH)
 MODE ?= shell
-MIGRATIONS = $(PROJECT_DIR)/migrations
+MIGRATIONS = $(PROJECT_DIR)/migrations/schemas
 
 # ENVS
 ENVS ?= \

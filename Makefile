@@ -27,7 +27,7 @@ init: init-db rustup
 checks:
 	make -f $(MK)/cargo.mk fmt-check lint
 
-schemas:
+schemas: init-db
 	make -f $(MK)/sqlx.mk run
 
 build: schemas
@@ -46,3 +46,4 @@ tests: stop build
 	make -f $(MK)/app.mk daemon
 	sleep 5
 	make -f $(MK)/cargo.mk test
+
