@@ -3,7 +3,8 @@ use serde::{Deserialize,Serialize};
 use crate::api::state::ApiState;
 use crate::api::endpoints::ApiResponse;
 use crate::api::errors::AppError;
-use crate::models as m;
+use crate::models::SingleEntityModel;
+use axum::Json;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ArchNoId {
@@ -18,18 +19,6 @@ pub struct Arch {
     pub description: Option<String>,
 }
 
-impl From<Arch> for m::arch::Arch {
-    fn from(value: Arch) -> Self {
-        return m::arch::Arch::new(value.id, value.name, value.description)
-    }
-}
-
-impl From<m::arch::Arch> for Arch {
-    fn from(value: m::arch::Arch) -> Self {
-        return Arch::new(value.id, value.name, value.description)
-    }
-}
-
 impl Arch {
     pub fn new (id: i64, name: String, description: Option<String>) -> Self {
         Arch {
@@ -42,7 +31,14 @@ impl Arch {
 
 pub async fn get_arch(Path(id): Path<i64>, State(app): State<ApiState>) -> Result<ApiResponse<Arch>, AppError> {
     let mut s: sqlx::Transaction<'_, sqlx::Postgres> = app.pool.begin().await.unwrap();
-    let p = m::arch::Arch::select_by_id(&mut s, id).await?;
+    let p = Arch::select(&mut s, id).await?;
     let _ = s.commit().await?;
-    Ok(ApiResponse::Json(p.into()))
+    Ok(ApiResponse::Json(p))
+}
+
+pub async fn create_arch(State(app): State<ApiState>, Json(data): Json<ArchNoId>) -> Result<ApiResponse<Arch>, AppError> {
+    let mut s: sqlx::Transaction<'_, sqlx::Postgres> = app.pool.begin().await.unwrap();
+    let p = Arch::insert(&mut s, data).await?;
+    let _ = s.commit().await?;
+    Ok(ApiResponse::Json(p))
 }

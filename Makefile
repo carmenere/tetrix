@@ -47,3 +47,8 @@ tests: stop build
 	sleep 5
 	make -f $(MK)/cargo.mk test
 
+docs:
+	make -f $(MK)/cargo.mk doc
+
+docs-open:
+	make -f $(MK)/cargo.mk doc-open

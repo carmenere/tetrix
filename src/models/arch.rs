@@ -7,6 +7,8 @@ pub struct Arch {
     pub description: Option<String>,
 }
 
+
+
 impl Arch {
     pub fn new (id: i64, name: String, description: Option<String>) -> Self {
         Arch {

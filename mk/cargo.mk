@@ -61,6 +61,7 @@ CMD_CLEAN ?= $(BUILD_ENVS) $(CARGO) clean --manifest-path $(CARGO_TOML) --target
 CMD_FMT ?= $(BUILD_ENVS) cargo +nightly fmt
 CMD_FMT_CHECK ?= $(CMD_FMT) -- --check && echo -e "    \033[1;32mFinished\033[0m fmt check."
 CMD_DOC ?= $(BUILD_ENVS) $(CARGO) doc --no-deps --document-private-items
+CMD_DOC_OPEN ?= $(BUILD_ENVS) $(CARGO) doc --no-deps --document-private-items --open
 
 .PHONY: all build clippy clippy-fix lint test fmt fmt-check doc install uninstall clean distclean
 
@@ -88,6 +89,9 @@ fmt-check:
 
 doc:
 	cd $(PROJECT_DIR) && $(CMD_DOC)
+
+doc-open:
+	cd $(PROJECT_DIR) && $(CMD_DOC_OPEN)
 
 clean:
 	cd $(PROJECT_DIR) && $(CMD_CLEAN)
