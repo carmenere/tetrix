@@ -1,12 +1,12 @@
-use axum::{routing::{get, post}, Router};
-use super::state::ApiState;
-use super::endpoints::version::build_version;
-use super::endpoints::arch::{get_arch, create_arch};
+use axum::Router;
+use super::endpoints::{arch, version};
+use crate::api::state::ApiState;
+// use tower_http::trace::TraceLayer;
 
 pub fn router(state: ApiState) -> Router {
     Router::new()
-    .route("/version", get(build_version))
-    .route("/arches/:id", get(get_arch))
-    .route("/arches", post(create_arch))
+    .nest("/", arch::router())
+    .nest("/", version::router())
     .with_state(state)
+    // .layer(TraceLayer::new_for_http())
 }
