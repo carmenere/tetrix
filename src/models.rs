@@ -1,4 +1,4 @@
-pub trait SingleEntityModel<'a> where Self: Sized {
+pub(crate) trait SingleEntityModel<'a> where Self: Sized {
     //! Contains methods to perform basic DML operation over some table in DB.<br>
     //! There are some special methods:
     //! - `upsert()` **inserts** 1 row if it *doesn't exist* or **updates existing** row, in PostgreSQL dialect it is semantically equal to `INSERT ... ON CONFLICT UPDATE`;
