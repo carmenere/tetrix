@@ -10,6 +10,9 @@ async fn get_version() -> Result<(), Box<dyn Error>> {
 
     let r = r.status().as_u16();
 
-    if r != StatusCode::OK.as_u16() {Err("Http status != 200 Ok".into())}
-    else {Ok(())}
+    if r != StatusCode::OK.as_u16() {
+        Err("Http status != 200 Ok".into())
+    } else {
+        Ok(())
+    }
 }
