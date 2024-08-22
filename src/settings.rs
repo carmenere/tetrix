@@ -11,7 +11,10 @@ pub struct Postgresql {
 
 impl ToString for Postgresql {
     fn to_string(&self) -> String {
-        String::from(format!("postgres://{0}:{1}@{2}:{3}/{4}", self.user, self.password, self.host, self.port, self.db))
+        String::from(format!(
+            "postgres://{0}:{1}@{2}:{3}/{4}",
+            self.user, self.password, self.host, self.port, self.db
+        ))
     }
 }
 
@@ -21,7 +24,10 @@ impl Postgresql {
             user: env::var("PG_USER").expect("PG_USER is not set."),
             password: env::var("PG_PASSWORD").expect("PG_PASSWORD is not set."),
             db: env::var("PG_DB").expect("PG_DB is not set."),
-            port: env::var("PG_PORT").expect("PG_PORT is not set.").parse::<u16>().unwrap(),
+            port: env::var("PG_PORT")
+                .expect("PG_PORT is not set.")
+                .parse::<u16>()
+                .unwrap(),
             host: env::var("PG_HOST").expect("PG_HOST is not set."),
         }
     }

@@ -1,7 +1,7 @@
 use axum::{self};
 use tokio;
 
-use tlib::{self, api::state::ApiState, api::router::router};
+use tlib::{self, api::router::router, api::state::ApiState};
 
 #[tokio::main]
 async fn main() {

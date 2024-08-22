@@ -1,5 +1,5 @@
 use axum::extract::FromRef;
-use sqlx::postgres::{PgPoolOptions, PgPool};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 
 use crate::settings::Setings;
 
@@ -14,7 +14,11 @@ impl ApiState {
         let s = Setings::new();
         log::debug!("{}", &s.pg_url.to_string());
         Self {
-            pool: PgPoolOptions::new().max_connections(10).connect(&s.pg_url.to_string()).await.unwrap(),
+            pool: PgPoolOptions::new()
+                .max_connections(10)
+                .connect(&s.pg_url.to_string())
+                .await
+                .unwrap(),
             settings: s,
         }
     }

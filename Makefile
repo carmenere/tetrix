@@ -27,6 +27,9 @@ init: init-db rustup
 checks:
 	make -f $(MK)/cargo.mk fmt-check lint
 
+fmt:
+	make -f $(MK)/cargo.mk fmt
+
 schemas: init-db
 	make -f $(MK)/sqlx.mk run
 
