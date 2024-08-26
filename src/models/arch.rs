@@ -1,7 +1,5 @@
-use super::pgerr::DbError;
+use crate::db::{pg::Session, pgerr::DbError};
 use super::{SingularModel, Upsert};
-use crate::models::DbSession;
-use sqlx::postgres::PgPool;
 
 #[derive(Debug, Clone)]
 pub struct ArchRow {
@@ -11,7 +9,7 @@ pub struct ArchRow {
 }
 
 impl<'a> SingularModel<'a> for ArchRow {
-    type Session = DbSession<'a>;
+    type Session = Session<'a>;
     type Id = i64;
     type Error = DbError;
     type Data = ArchRow;

@@ -2,7 +2,7 @@ use crate::api::endpoints::ApiResponse;
 use crate::api::errors::AppError;
 use crate::api::state::ApiState;
 use crate::models::arch::ArchRow;
-use crate::models::{Session, SingularModel};
+use crate::models::SingularModel;
 use axum::extract::{Path, State};
 use axum::Json;
 use serde::{Deserialize, Serialize};
@@ -44,9 +44,9 @@ pub async fn get_arch(
     Path(id): Path<i64>,
     State(app): State<ApiState>,
 ) -> Result<ApiResponse<Arch>, AppError> {
-    let mut s = Session::new(app.pool).await?;
-    let p = ArchRow::select(&mut s.session, id).await?;
-    let _ = s.commit().await?;
+    let mut pg = app.settings.pgclient.connect().await?;
+    let p = ArchRow::select(&mut pg.session, id).await?;
+    let _ = pg.commit().await?;
     Ok(ApiResponse::Json(p.into()))
 }
 
@@ -54,14 +54,14 @@ pub async fn create_arch(
     State(app): State<ApiState>,
     Json(data): Json<ArchNoId>,
 ) -> Result<ApiResponse<Arch>, AppError> {
-    let mut s = Session::new(app.pool).await?;
+    let mut pg = app.settings.pgclient.connect().await?;
     let model = ArchRow {
-        id: ArchRow::next_id(&mut s.session).await?,
+        id: ArchRow::next_id(&mut pg.session).await?,
         name: data.name,
         description: data.description,
     };
-    let p = model.insert(&mut s.session).await?;
-    let _ = s.commit().await?;
+    let p = model.insert(&mut pg.session).await?;
+    let _ = pg.commit().await?;
     Ok(ApiResponse::Json(p.into()))
 }
 
@@ -70,15 +70,15 @@ pub async fn update_arch(
     State(app): State<ApiState>,
     Json(data): Json<ArchNoId>,
 ) -> Result<ApiResponse<Arch>, AppError> {
-    let mut s = Session::new(app.pool).await?;
+    let mut pg = app.settings.pgclient.connect().await?;
     dbg!(&data);
     let model = ArchRow {
         id,
         name: data.name,
         description: data.description,
     };
-    let p = model.update(&mut s.session).await?;
-    let _ = s.commit().await?;
+    let p = model.update(&mut pg.session).await?;
+    let _ = pg.commit().await?;
     Ok(ApiResponse::Json(p.into()))
 }
 
@@ -86,9 +86,9 @@ pub async fn delete_arch(
     Path(id): Path<i64>,
     State(app): State<ApiState>,
 ) -> Result<ApiResponse<Id>, AppError> {
-    let mut s = Session::new(app.pool).await?;
-    let p = ArchRow::delete(&mut s.session, id).await?;
-    let _ = s.commit().await?;
+    let mut pg = app.settings.pgclient.connect().await?;
+    let p = ArchRow::delete(&mut pg.session, id).await?;
+    let _ = pg.commit().await?;
     Ok(ApiResponse::Json(Id { id: id }))
 }
 

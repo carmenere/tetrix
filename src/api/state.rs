@@ -1,31 +1,21 @@
 use axum::extract::FromRef;
-use sqlx::postgres::{PgPool, PgPoolOptions};
-
-use crate::settings::Setings;
+use crate::settings::Settings;
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub settings: Setings,
-    pub pool: PgPool,
+    pub settings: Settings,
 }
 
 impl ApiState {
     pub async fn new() -> Self {
-        let s = Setings::new();
-        log::debug!("{}", &s.pg_url.to_string());
         Self {
-            pool: PgPoolOptions::new()
-                .max_connections(10)
-                .connect(&s.pg_url.to_string())
-                .await
-                .unwrap(),
-            settings: s,
+            settings: Settings::new().await
         }
     }
 }
 
-impl FromRef<ApiState> for Setings {
-    fn from_ref(app_state: &ApiState) -> Setings {
+impl FromRef<ApiState> for Settings {
+    fn from_ref(app_state: &ApiState) -> Settings {
         app_state.settings.clone()
     }
 }

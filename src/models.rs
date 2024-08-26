@@ -1,7 +1,4 @@
-use pgerr::DbError;
 use sqlx::postgres::PgPool;
-
-pub type DbSession<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
 
 enum Upsert {
     /// In PostgreSQL dialect this variant is semantically equal to `INSERT ... ON CONFLICT UPDATE`
@@ -42,19 +39,3 @@ where
 // }
 
 pub mod arch;
-pub mod pgerr;
-
-pub struct Session<'a> {
-    pub session: sqlx::Transaction<'a, sqlx::Postgres>,
-}
-
-impl<'a> Session<'a> {
-    pub async fn new(pool: PgPool) -> Result<Self, DbError> {
-        Ok(Self {
-            session: pool.begin().await?,
-        })
-    }
-    pub async fn commit(self) -> Result<(), DbError> {
-        Ok(self.session.commit().await?)
-    }
-}

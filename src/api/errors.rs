@@ -1,4 +1,4 @@
-use crate::models::pgerr::DbError;
+use crate::db::pgerr::DbError;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde_json::json;
