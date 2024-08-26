@@ -2,7 +2,7 @@ use crate::api::endpoints::ApiResponse;
 use crate::api::errors::AppError;
 use crate::api::state::ApiState;
 use crate::models::arch::{ArchRow, ArchRowOptId};
-use crate::models::{SingularModel, SelectRow, InsertRow, UpdateRow, DeleteRow, NextId};
+use crate::models::{SelectRow, InsertRow, UpdateRow, DeleteRow};
 use axum::extract::{Path, State};
 use axum::Json;
 use serde::{Deserialize, Serialize};
