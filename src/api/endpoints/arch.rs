@@ -1,12 +1,14 @@
 use crate::api::endpoints::ApiResponse;
 use crate::api::errors::AppError;
 use crate::api::state::ApiState;
+use crate::db::pg::Client as PgClient;
+use crate::db::pgerr::DbError;
+use crate::models::arch as m;
 use crate::models::arch::{ArchRow, ArchRowOptId};
-use crate::models::{SelectRow, InsertRow, UpdateRow, DeleteRow};
+use crate::models::{DeleteRow, InsertRow, SelectRow, UpdateRow};
 use axum::extract::{Path, State};
 use axum::Json;
 use serde::{Deserialize, Serialize};
-use crate::models::arch as m;
 
 use axum::{
     routing::{delete, get, post, put},
@@ -56,22 +58,23 @@ impl From<ArchNoId> for ArchRowOptId {
 
 pub async fn get_arch(
     Path(id): Path<i64>,
-    State(app): State<ApiState>,
+    State(pg): State<PgClient>,
 ) -> Result<ApiResponse<Arch>, AppError> {
-    let mut pg = app.settings.pgclient.connect().await?;
-    // let p = ArchRow::select(&mut pg.session, id).await?;
-    let arch = m::Arch::select(&mut pg.session, id).await?;
-    let _ = pg.commit().await?;
-    Ok(ApiResponse::Json(arch.into()))
+    let mut db = pg.connect().await?;
+    let mut arch = m::Arch::new(&mut db.session);
+    let r: ArchRow = arch.select(id).await?;
+    let _ = db.commit().await?;
+    Ok(ApiResponse::Json(r.into()))
 }
 
 pub async fn create_arch(
     State(app): State<ApiState>,
     Json(data): Json<ArchNoId>,
 ) -> Result<ApiResponse<Arch>, AppError> {
-    let mut pg = app.settings.pgclient.connect().await?;
-    let arch = m::Arch::insert(&mut pg.session, data.into()).await?;
-    let _ = pg.commit().await?;
+    let mut db = app.db.connect().await?;
+    let mut arch = m::Arch::new(&mut db.session);
+    let arch = arch.insert(data.into()).await?;
+    let _ = db.commit().await?;
     Ok(ApiResponse::Json(arch.into()))
 }
 
@@ -80,15 +83,16 @@ pub async fn update_arch(
     State(app): State<ApiState>,
     Json(data): Json<ArchNoId>,
 ) -> Result<ApiResponse<Arch>, AppError> {
-    let mut pg = app.settings.pgclient.connect().await?;
+    let mut db = app.db.connect().await?;
+    let mut arch = m::Arch::new(&mut db.session);
     dbg!(&data);
     let data = ArchRow {
         id,
         name: data.name,
         description: data.description,
     };
-    let arch = m::Arch::update(&mut pg.session, data).await?;
-    let _ = pg.commit().await?;
+    let arch = arch.update(data).await?;
+    let _ = db.commit().await?;
     Ok(ApiResponse::Json(arch.into()))
 }
 
@@ -96,9 +100,10 @@ pub async fn delete_arch(
     Path(id): Path<i64>,
     State(app): State<ApiState>,
 ) -> Result<ApiResponse<Id>, AppError> {
-    let mut pg = app.settings.pgclient.connect().await?;
-    let id = m::Arch::delete(&mut pg.session, id).await?;
-    let _ = pg.commit().await?;
+    let mut db = app.db.connect().await?;
+    let mut arch = m::Arch::new(&mut db.session);
+    let id = arch.delete(id).await?;
+    let _ = db.commit().await?;
     Ok(ApiResponse::Json(Id { id: id }))
 }
 

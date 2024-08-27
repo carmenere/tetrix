@@ -1,5 +1,5 @@
 use crate::db::{pg::Session, pgerr::DbError};
-use crate::models::{Model, SelectRow, InsertRow, UpdateRow, DeleteRow, NextId};
+use crate::models::{DeleteRow, InsertRow, Model, NextId, SelectRow, UpdateRow};
 
 #[derive(Debug, Clone)]
 pub struct ArchRow {
@@ -15,20 +15,29 @@ pub struct ArchRowOptId {
     pub description: Option<String>,
 }
 
-pub struct Arch;
-
-impl Model for Arch {
-    const name: &'static str = "arches";
-    type Id = i64;
+pub struct Arch<'a, 'b> {
+    session: &'b mut Session<'a>,
 }
 
-impl<'a> SelectRow<'a> for Arch {
-    type Id = <Arch as Model>::Id;
+impl<'a, 'b> Arch<'a, 'b>
+where
+    'a: 'b,
+{
+    pub fn new(session: &'b mut Session<'a>) -> Self {
+        Self { session }
+    }
+}
+
+impl<'a> Model<'a> for Arch<'a, '_> {
+    const name: &'static str = "arches";
+    type Id = i64;
     type Error = DbError;
     type Row = ArchRow;
     type Session = Session<'a>;
+}
 
-    async fn select(s: &mut Self::Session, id: Self::Id) -> Result<Self::Row, Self::Error> {
+impl<'a> SelectRow<'a> for Arch<'a, '_> {
+    async fn select(&mut self, id: Self::Id) -> Result<Self::Row, Self::Error> {
         Ok(sqlx::query_as!(
             Self::Row,
             r#"
@@ -36,56 +45,47 @@ impl<'a> SelectRow<'a> for Arch {
             "#,
             id
         )
-        .fetch_one(&mut **s)
+        .fetch_one(&mut **self.session)
         .await?)
     }
 }
 
-impl<'a> InsertRow<'a> for Arch {
-    type Id = <Arch as Model>::Id;
-    type Error = DbError;
-    type Row = ArchRow;
+impl<'a> InsertRow<'a> for Arch<'a, '_> {
     type Data = ArchRowOptId;
-    type Session = Session<'a>;
 
-    async fn insert(s: &mut Self::Session, data: Self::Data) -> Result<Self::Row, Self::Error> {
+    async fn insert(&mut self, data: Self::Data) -> Result<Self::Row, Self::Error> {
         match data.id {
-            Some(id) => {
-                Ok(sqlx::query_as!(
-                        ArchRow,
-                        r#"
+            Some(id) => Ok(sqlx::query_as!(
+                ArchRow,
+                r#"
                             INSERT INTO arches (id, name, description)
                             VALUES ($1, $2, $3)
                             RETURNING id, name, description
                         "#,
-                        id,
-                        data.name,
-                        data.description
-                    ).fetch_one(&mut **s).await?)
-            },
-            None => {
-                Ok(sqlx::query_as!(
-                        ArchRow,
-                        r#"
+                id,
+                data.name,
+                data.description
+            )
+            .fetch_one(&mut **self.session)
+            .await?),
+            None => Ok(sqlx::query_as!(
+                ArchRow,
+                r#"
                             INSERT INTO arches (name, description)
                             VALUES ($1, $2)
                             RETURNING id, name, description
                         "#,
-                        data.name,
-                        data.description
-                    ).fetch_one(&mut **s).await?)
-            },
+                data.name,
+                data.description
+            )
+            .fetch_one(&mut **self.session)
+            .await?),
         }
     }
 }
 
-impl<'a> UpdateRow<'a> for Arch {
-    type Id = <Arch as Model>::Id;
-    type Error = DbError;
-    type Row = ArchRow;
-    type Session = Session<'a>;
-
-    async fn update(s: &mut Self::Session, data: Self::Row) -> Result<Self::Row, Self::Error> {
+impl<'a> UpdateRow<'a> for Arch<'a, '_> {
+    async fn update(&mut self, data: Self::Row) -> Result<Self::Row, Self::Error> {
         Ok(sqlx::query_as!(
             ArchRow,
             r#"
@@ -96,35 +96,29 @@ impl<'a> UpdateRow<'a> for Arch {
             data.id,
             data.name,
             data.description
-            )
-            .fetch_one(&mut **s)
-            .await?)
+        )
+        .fetch_one(&mut **self.session)
+        .await?)
     }
 }
 
-
-impl<'a> DeleteRow<'a> for Arch {
-    type Id = <Arch as Model>::Id;
-    type Error = DbError;
-    type Session = Session<'a>;
-
-    async fn delete(s: &mut Self::Session, id: Self::Id) -> Result<Self::Id, Self::Error> {
+impl<'a> DeleteRow<'a> for Arch<'a, '_> {
+    async fn delete(&mut self, id: Self::Id) -> Result<Self::Id, Self::Error> {
         sqlx::query_scalar!(
-                r#"DELETE FROM arches WHERE id = $1 RETURNING id AS "id: _" "#,
-                id
-        ).fetch_optional(&mut **s).await?.ok_or(DbError::NotFound)
-    }
-}
-
-impl<'a> NextId<'a> for Arch {
-    type Id = <Arch as Model>::Id;
-    type Error = DbError;
-    type Session = Session<'a>;
-    
-    async fn next_id(s: &mut Self::Session) -> Result<Self::Id, Self::Error> {
-        sqlx::query_scalar!(r#"SELECT nextval('arches_id_seq'::regclass)"#)
-        .fetch_one(&mut **s)
+            r#"DELETE FROM arches WHERE id = $1 RETURNING id AS "id: _" "#,
+            id
+        )
+        .fetch_optional(&mut **self.session)
         .await?
         .ok_or(DbError::NotFound)
+    }
+}
+
+impl<'a> NextId<'a> for Arch<'a, '_> {
+    async fn next_id(&mut self) -> Result<Self::Id, Self::Error> {
+        sqlx::query_scalar!(r#"SELECT nextval('arches_id_seq'::regclass)"#)
+            .fetch_one(&mut **self.session)
+            .await?
+            .ok_or(DbError::NotFound)
     }
 }

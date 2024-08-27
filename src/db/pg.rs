@@ -1,7 +1,6 @@
 use super::pgerr::DbError;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::env;
-
 pub type Session<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
 
 #[derive(Debug, Clone)]
@@ -40,7 +39,7 @@ impl ConnUrl {
 #[derive(Clone)]
 pub struct Client {
     pub pool: PgPool,
-    pub conn_url: ConnUrl, 
+    pub conn_url: ConnUrl,
 }
 
 impl Client {
@@ -57,17 +56,16 @@ impl Client {
         }
     }
 
-    pub async fn connect(&self) -> Result<Conn, DbError> {
-        Ok(Conn::new(&self.pool).await?)
+    pub async fn connect<'a>(&self) -> Result<DbClient<'a>, DbError> {
+        Ok(DbClient::new(&self.pool).await?)
     }
 }
 
-
-pub struct Conn<'a> {
+pub struct DbClient<'a> {
     pub session: sqlx::Transaction<'a, sqlx::Postgres>,
 }
 
-impl<'a> Conn<'a> {
+impl<'a> DbClient<'a> {
     pub async fn new(pool: &PgPool) -> Result<Self, DbError> {
         Ok(Self {
             session: pool.begin().await?,

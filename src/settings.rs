@@ -13,7 +13,7 @@ impl Settings {
     }
 }
 
-// struct Conf<'a, T> 
+// struct Conf<'a, T>
 // where
 //     T: Settings
 // {
