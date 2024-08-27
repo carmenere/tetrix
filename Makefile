@@ -27,6 +27,9 @@ init: init-db rustup
 checks:
 	make -f $(MK)/cargo.mk fmt-check lint
 
+fmt-check:
+	make -f $(MK)/cargo.mk fmt-check
+
 fmt:
 	make -f $(MK)/cargo.mk fmt
 
