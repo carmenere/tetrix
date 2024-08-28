@@ -29,7 +29,7 @@ where
 }
 
 impl<'a> Model<'a> for Arch<'a, '_> {
-    const name: &'static str = "arches";
+    const NAME: &'static str = "arches";
     type Id = i64;
     type Error = DbError;
     type Row = ArchRow;
