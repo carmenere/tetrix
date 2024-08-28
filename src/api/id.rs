@@ -1,50 +1,111 @@
-use std::fmt::UpperHex;
+use std::{fmt::UpperHex, marker::PhantomData};
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 use std::str::FromStr;
 use std::num::ParseIntError;
+use std::fmt::{self, Debug};
 
-use super::{endpoints::arch::Arch, errors::AppError};
-
-pub trait ResourceId {
-    const PREFIX: &'static str;
-    type Id: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError>;
-
-    fn id(&self) -> Self::Id;
-    fn new(id: Self::Id) -> Self;
-    fn parse(s: &str) -> Result<Self::Id, ParseIntError>;
+#[derive(Debug, Serialize, Clone)]
+pub struct Id<I>
+{
+    id: I
 }
 
-#[derive(Debug, Clone)]
-pub struct Id<T>(pub T);
-
-#[derive(Debug, Clone)]
-pub struct Rid<T>(pub T);
-
-impl<T> Rid<T>
-where
-    T: ResourceId
-{
-    fn new(rid: T) -> Self {
-        Rid::<T>(rid)
+impl<I> Id<I> {
+    pub fn new(id: I) -> Self {
+        Self {
+            id
+        }
     }
 }
 
-impl<T> Serialize for Rid<T>
+pub trait Entity {
+    const ENTITY: &'static str;
+}
+
+pub trait Prefix {
+    const PREFIX: &'static str;
+    fn prefix() -> String {
+        format!("{}_id-", Self::PREFIX)
+    }
+}
+
+pub trait ParseId: Sized {
+    fn from_str_radix(s: &str, radix: u32) -> Result<Self, ParseIntError>;
+}
+
+impl ParseId for i64 {
+    fn from_str_radix(s: &str, radix: u32) -> Result<Self, ParseIntError> {
+        dbg!(&s);
+        Self::from_str_radix(s, radix)
+    }
+}
+
+impl ParseId for u64 {
+    fn from_str_radix(s: &str, radix: u32) -> Result<Self, ParseIntError> {
+        dbg!(&s);
+        Self::from_str_radix(s, radix)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Rid<I,T>
 where
-    T: ResourceId
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
+{
+    pub id: I,
+    _phantom: PhantomData<T>
+}
+
+impl<T,I> Rid<I,T>
+where
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
+{
+    pub fn new(id: I) -> Self {
+        Self {
+            id: id,
+            _phantom: PhantomData
+        }
+    }
+}
+
+impl<I,T> Prefix for Rid<I,T>
+where
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
+{
+    const PREFIX: &'static str = T::ENTITY;
+}
+
+impl<I,T> From<I> for Rid<I,T>
+where
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
+{
+    fn from(v: I) -> Self {
+        Self::new(v)
+    }
+}
+
+impl<I,T> Serialize for Rid<I,T>
+where
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> 
     where
         S: Serializer
     {
-        let s = format!("{}-{:X}", T::PREFIX, self.0.id());
+        let s = format!("{}-{:X}", Self::PREFIX, self.id);
         serializer.serialize_str(&s)
     }
 }
 
-impl<'de, T> Deserialize<'de> for Rid<T>
+impl<'de,I,T> Deserialize<'de> for Rid<I,T>
 where
-    T: ResourceId
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -56,16 +117,19 @@ where
     }
 }
 
-impl<T> FromStr for Rid<T>
+impl<I,T> FromStr for Rid<I,T>
 where
-    T: ResourceId,
-    T::Id: UpperHex + FromStr<Err = ParseIntError>
+    T: Entity,
+    I: std::fmt::Debug + UpperHex + FromStr<Err = ParseIntError> + Copy + ParseId
 {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, ParseIntError> {
-        let id = T::parse(s)?;
+        let id = match s.strip_prefix(&Self::prefix()) {
+            Some(s) => I::from_str_radix(s, 16)?,
+            None => I::from_str_radix(s, 10)?,
+        };
         dbg!(&id);
-        Ok(Rid::<T>(T::new(id)))
+        Ok(Rid::<I,T>::new(id))
     }
 }

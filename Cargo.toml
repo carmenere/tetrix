@@ -25,6 +25,7 @@ serde_json = { version = "1.0.113" }
 sqlx = { version = "0.7.3" , default_features = false, features = ["postgres", "runtime-tokio-native-tls", "macros", "chrono"]}
 tokio = { version = "1", features = ["full"] }
 tower-http = {version = "=0.5.2", features = ["trace"]}
+const_format = "=0.2.32"
 
 [dev-dependencies]
 httpc-test = "0.1.9"
