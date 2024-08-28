@@ -2,13 +2,14 @@ use crate::api::endpoints::ApiResponse;
 use crate::api::errors::AppError;
 use crate::api::state::ApiState;
 use crate::db::pg::Client as PgClient;
-use crate::db::pgerr::DbError;
 use crate::models::arch as m;
 use crate::models::arch::{ArchRow, ArchRowOptId};
 use crate::models::{DeleteRow, InsertRow, SelectRow, UpdateRow};
 use axum::extract::{Path, State};
 use axum::Json;
 use serde::{Deserialize, Serialize};
+use crate::api::id::{ResourceId, Rid};
+use serde_json::json;
 
 use axum::{
     routing::{delete, get, post, put},
@@ -17,29 +18,64 @@ use axum::{
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
-pub struct ArchNoId {
-    pub id: Option<i64>,
+pub(crate) struct ArchNoId {
+    pub id: Option<Rid<ArchId>>,
     pub name: String,
     pub description: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+
+#[derive(Debug, Clone)]
+pub(crate) struct ArchId {
+    id: i64
+}
+
+impl ArchId {
+    fn new(id: i64) -> Self {
+        Self {
+            id
+        }
+    }
+}
+
+impl ResourceId for ArchId {
+    const PREFIX: &'static str = "arch_id";
+    type Id = i64;
+
+    fn id(&self) -> Self::Id {
+        self.id
+    }
+
+    fn new(id: Self::Id) -> Self {
+        Self {
+            id
+        }
+    }
+    
+    fn parse(s: &str) -> Result<Self::Id, std::num::ParseIntError> {
+        let p = format!("{}-", Self::PREFIX);
+        let r = match s.strip_prefix(&p) {
+            Some(s) => Self::Id::from_str_radix(s, 16)?,
+            None => Self::Id::from_str_radix(s, 10)?,
+        };
+        dbg!(r);
+        Ok(r)
+    }
+
+}
+
+#[derive(Debug, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
-pub struct Arch {
-    pub id: i64,
+pub(crate) struct Arch {
+    pub id: Rid<ArchId>,
     pub name: String,
     pub description: Option<String>,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Id {
-    pub id: i64,
 }
 
 impl From<ArchRow> for Arch {
     fn from(v: ArchRow) -> Self {
         Self {
-            id: v.id,
+            id: Rid(ArchId::new(v.id)),
             name: v.name,
             description: v.description,
         }
@@ -49,25 +85,25 @@ impl From<ArchRow> for Arch {
 impl From<ArchNoId> for ArchRowOptId {
     fn from(v: ArchNoId) -> Self {
         Self {
-            id: v.id,
+            id: v.id.map(|id| {id.0.id()}),
             name: v.name,
             description: v.description,
         }
     }
 }
 
-pub async fn get_arch(
-    Path(id): Path<i64>,
+pub(crate) async fn get_arch(
+    Path(id): Path<Rid<ArchId>>,
     State(pg): State<PgClient>,
 ) -> Result<ApiResponse<Arch>, AppError> {
     let mut db = pg.connect().await?;
     let mut arch = m::Arch::new(&mut db.session);
-    let r: ArchRow = arch.select(id).await?;
+    let r: ArchRow = arch.select(id.0.id()).await?;
     let _ = db.commit().await?;
     Ok(ApiResponse::Json(r.into()))
 }
 
-pub async fn create_arch(
+pub(crate) async fn create_arch(
     State(app): State<ApiState>,
     Json(data): Json<ArchNoId>,
 ) -> Result<ApiResponse<Arch>, AppError> {
@@ -78,8 +114,8 @@ pub async fn create_arch(
     Ok(ApiResponse::Json(arch.into()))
 }
 
-pub async fn update_arch(
-    Path(id): Path<i64>,
+pub(crate) async fn update_arch(
+    Path(id): Path<Rid<ArchId>>,
     State(app): State<ApiState>,
     Json(data): Json<ArchNoId>,
 ) -> Result<ApiResponse<Arch>, AppError> {
@@ -87,7 +123,7 @@ pub async fn update_arch(
     let mut arch = m::Arch::new(&mut db.session);
     dbg!(&data);
     let data = ArchRow {
-        id,
+        id: id.0.id(),
         name: data.name,
         description: data.description,
     };
@@ -96,15 +132,15 @@ pub async fn update_arch(
     Ok(ApiResponse::Json(arch.into()))
 }
 
-pub async fn delete_arch(
-    Path(id): Path<i64>,
+pub(crate) async fn delete_arch(
+    Path(id): Path<Rid<ArchId>>,
     State(app): State<ApiState>,
-) -> Result<ApiResponse<Id>, AppError> {
+) -> Result<ApiResponse<Rid<ArchId>>, AppError> {
     let mut db = app.db.connect().await?;
     let mut arch = m::Arch::new(&mut db.session);
-    let id = arch.delete(id).await?;
+    let id = arch.delete(id.0.id()).await?;
     let _ = db.commit().await?;
-    Ok(ApiResponse::Json(Id { id: id }))
+    Ok(ApiResponse::Json(Rid::<ArchId>(ArchId { id: id })))
 }
 
 pub fn router() -> Router<ApiState> {

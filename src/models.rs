@@ -8,7 +8,7 @@ pub(crate) enum Upsert {
 pub mod arch;
 
 pub(crate) trait Model<'a> {
-    const name: &'static str;
+    const NAME: &'static str;
     type Id;
     type Error;
     type Row;

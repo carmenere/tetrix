@@ -9,7 +9,7 @@ get_arch:
 	curl -v -X GET http://localhost:8888/arches/$(ARCH_ID)
 
 post_arch:
-	curl -vvv -X POST http://localhost:8888/arches -H "Content-Type: application/json" -d '{"id": $(ARCH_ID), "name": "aarch64"}'
+	curl -vvv -X POST http://localhost:8888/arches -H "Content-Type: application/json" -d '{"id": "$(ARCH_ID)", "name": "aarch64"}'
 
 post_arch_no_id:
 	curl -vvv -X POST http://localhost:8888/arches -H "Content-Type: application/json" -d '{"name": "arm64"}'
