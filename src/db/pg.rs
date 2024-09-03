@@ -23,15 +23,13 @@ impl ToString for ConnUrl {
 
 impl ConnUrl {
     pub fn new() -> Self {
+        let postgres = "postgres".to_string();
         Self {
-            user: env::var("PG_USER").expect("PG_USER is not set."),
-            password: env::var("PG_PASSWORD").expect("PG_PASSWORD is not set."),
-            db: env::var("PG_DB").expect("PG_DB is not set."),
-            port: env::var("PG_PORT")
-                .expect("PG_PORT is not set.")
-                .parse::<u16>()
-                .unwrap(),
-            host: env::var("PG_HOST").expect("PG_HOST is not set."),
+            user: env::var("PG_USER").unwrap_or(postgres.clone()),
+            password: env::var("PG_PASSWORD").unwrap_or(postgres.clone()),
+            db: env::var("PG_DB").unwrap_or(postgres),
+            port: env::var("PG_PORT").unwrap_or("5432".to_string()).parse::<u16>().unwrap(),
+            host: env::var("PG_HOST").unwrap_or("localhost".to_string()),
         }
     }
 }
