@@ -1,0 +1,15 @@
+[package]
+authors = ["Anton Romanov <a.romanovich86@gmail.com>"]
+description = "Tetrix namespace engine"
+edition = "2024"
+exclude = [".gitignore"]
+keywords = ["tetrix", "ttx", "namespace", "ns"]
+license = "Apache-2.0"
+name = "tetrix-namespace"
+readme = "README.md"
+repository = "https://github.com/carmenere/tetrix"
+rust-version = "1.90.0"
+version = "0.0.1"
+
+[lib]
+name = "ttx_ns"

@@ -1,0 +1,31 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "ttx-api",
+    "ttx-cli",
+    "ttx-contracts",
+    "ttx-models",
+    "ttx-ns",
+    "ttx-types",
+]
+
+[workspace.package]
+edition = "2024"
+
+[workspace.dependencies]
+axum = { version = "0.8.6", features = ["macros"]}
+axum-extra = { version = "0.10.3", features = ["typed-header"]}
+env_logger = { version = "0.11.2" }
+log = { version =  "0.4.28" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.145" }
+sqlx = { version = "0.8.6" , default_features = false, features = ["postgres", "runtime-tokio-native-tls", "macros", "chrono"]}
+tokio = { version = "1.47.1", features = ["full"] }
+
+[profile.release]
+strip = "symbols"
+
+[profile.dev]
+opt-level = 3
+debug = 1
