@@ -1,0 +1,8 @@
+edition = "2024"
+group_imports = "Preserve"
+# group_imports = "StdExternalCrate"
+# imports_granularity = "Crate"
+imports_granularity = "Module"
+imports_layout = "Vertical"
+# format_generated_files = false
+ignore = [ "examples", "generated", "xdrgen" ]

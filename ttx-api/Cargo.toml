@@ -1,0 +1,18 @@
+[package]
+authors = ["Anton Romanov <a.romanovich86@gmail.com>"]
+description = "Tetrix RESTful API"
+edition = "2024"
+exclude = [".gitignore"]
+keywords = ["tetrix", "ttx", "rest-api"]
+license = "Apache-2.0"
+name = "tetrix-api"
+readme = "README.md"
+repository = "https://github.com/carmenere/tetrix"
+rust-version = "1.90.0"
+version = "0.0.1"
+
+[lib]
+name = "ttx_api"
+
+# [[bin]]
+# name = "tetrix-api"

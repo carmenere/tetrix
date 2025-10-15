@@ -1,0 +1,19 @@
+[package]
+authors = ["Anton Romanov <a.romanovich86@gmail.com>"]
+description = "Tetrix command line util"
+edition = "2024"
+exclude = [".gitignore"]
+keywords = ["tetrix", "ttx", "cli", "util"]
+license = "Apache-2.0"
+name = "tetrix"
+readme = "README.md"
+repository = "https://github.com/carmenere/tetrix"
+rust-version = "1.90.0"
+version = "0.0.1"
+
+# [[bin]]
+# name = "tetrix"
+# path = "src/main.rs"
+
+[lib]
+name = "ttx_cli"

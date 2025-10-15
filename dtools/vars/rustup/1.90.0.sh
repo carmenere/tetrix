@@ -1,0 +1,5 @@
+
+RUSTUP_TOOLCHAIN="1.90.0"
+RUSTUP_TARGET_TRIPLE=$(rust_target_triple)
+RUSTUP_COMPONENTS=(clippy rustfmt)
+NIGHTLY_VERSION="nightly-2025-10-12"

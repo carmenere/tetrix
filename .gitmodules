@@ -1,0 +1,3 @@
+[submodule "dtools/core"]
+	path = dtools/core
+	url = git@github.com:carmenere/dtools-core.git
