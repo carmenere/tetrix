@@ -15,7 +15,7 @@ name = "tetrix-contracts"
 version = "0.0.1"
 
 [[package]]
-name = "tetrix-db-models"
+name = "tetrix-models"
 version = "0.0.1"
 
 [[package]]

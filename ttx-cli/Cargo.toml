@@ -11,9 +11,9 @@ repository = "https://github.com/carmenere/tetrix"
 rust-version = "1.90.0"
 version = "0.0.1"
 
-[[bin]]
-name = "tetrix"
-path = "src/main.rs"
+# [[bin]]
+# name = "tetrix"
+# path = "src/main.rs"
 
 [lib]
 name = "ttx_cli"
